@@ -3,7 +3,7 @@ from easygui import *
 import re
 import netifaces
 import ipaddress
-import time
+import subprocess as sp
 
 if not os.path.exists('ip.txt'):
     open('ip.txt', 'w')
@@ -13,11 +13,13 @@ ip_file = ''
 port_file = ''
 new_ip_port = ''
 
+
 def get_ip_from_subnet(ip_subnet):
     ipn = ipaddress.IPv4Network(ip_subnet, strict=False)
     ips = ipaddress.ip_network(ipn)
     ip_list = [str(ip) for ip in ips]
     return ip_list
+
 
 msg = "Select the mode to use!"
 choices = ["Manual", "Scan", "Cancel"]
@@ -41,8 +43,9 @@ if reply == "Manual":
         new_ip_port = ip + ':' + port
         file.write(new_ip_port)
         file.close()
+
     os.system('adb connect ' + new_ip_port)
-else:
+elif reply == "Scan":
     availableIp = []
     for ifaceName in netifaces.interfaces():
         addresses = [i['addr'] for i in
@@ -58,15 +61,5 @@ else:
         command += 'adb connect ' + i + ' & '
 
     os.system(command)
-
-
-def check_ip(ip):
-    regex = re.compile("(\d+):(\d+):(\d+):(\d+)")
-    r = regex.search(ip)
-    for i in r.groups():
-        if not i.isdigit:
-            return False
-    return True
-
-
-
+else:
+    print ("Exit")
